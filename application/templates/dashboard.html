@@ -1,0 +1,281 @@
+{% extends "base.html" %} {% block content %}
+<h1>Painel principal</h1>
+
+<!--Showing different content for users, who already have added kids and users who don't.-->
+<!--For users, who have not yet added a kid:-->
+{% if not user.kids %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong>Bem-vindo!</strong> Começa por adicionar uma criança, clicando no
+  botão abaixo.
+  <button
+    type="button"
+    class="btn-close"
+    data-bs-dismiss="alert"
+    aria-label="Close"
+  ></button>
+</div>
+{% endif %}
+
+<!-- Button trigger modal -->
+<button
+  type="button"
+  class="btn btn-primary"
+  data-bs-toggle="modal"
+  data-bs-target="#addKid"
+>
+  <i class="bi bi-person-plus"></i> Adicionar criança
+</button>
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="addKid"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Adicionar criança</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="nameInput" class="form-label">Nome</label>
+            <input
+              type="text"
+              class="form-control"
+              id="nameInput"
+              aria-describedby="emailHelp"
+              name="kidName"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="imageInput" class="form-label">Imagem</label>
+            <input
+              type="file"
+              accept="image/*"
+              class="form-control"
+              id="imageInput"
+              name="kidImage"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Adicionar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Kids -->
+<div class="row row-cols-4 mt-3">
+  {% for kid in user.kids %}
+
+  <div class="card me-3">
+    <a
+      href="{{ url_for('kid_dashboard', username = user.username, kid_id = kid.id, action = 'view') }}"
+    >
+      <img
+        src="{{kid.image_path}}"
+        class="card-img-top pt-2"
+        alt="Imagem de {{kid.name}}"
+        height="250"
+      />
+    </a>
+
+    <div class="card-body">
+      <div class="d-flex justify-content-between">
+        <h5 class="card-title align-self-center">{{kid.name}}</h5>
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#kidConfigurationsModal_{{kid.id}}"
+        >
+          <i class="bi bi-three-dots"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="kidConfigurationsModal_{{kid.id}}"
+    tabindex="-1"
+    aria-labelledby="kidConfigurationsModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="kidConfigurationsModalLabel">
+            Configurações de {{kid.name}}
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <!-- Tabs Navigation Start -->
+          <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+              <button
+                class="nav-link active"
+                id="nav-name-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-name"
+                type="button"
+                role="tab"
+                aria-controls="nav-name"
+                aria-selected="true"
+              >
+                Nome
+              </button>
+              <button
+                class="nav-link"
+                id="nav-image-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-image"
+                type="button"
+                role="tab"
+                aria-controls="nav-image"
+                aria-selected="true"
+              >
+                Imagem
+              </button>
+              <button
+                class="nav-link"
+                id="nav-delete-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-delete"
+                type="button"
+                role="tab"
+                aria-controls="nav-delete"
+                aria-selected="true"
+              >
+                Eliminar
+              </button>
+            </div>
+          </nav>
+          <!-- Tabs Navigation End -->
+          <!-- Tabs Content Start -->
+          <div class="tab-content" id="nav-tabContent">
+            <div
+              class="tab-pane fade show active p-3"
+              id="nav-name"
+              role="tabpanel"
+              aria-labelledby="nav-name-tab"
+            >
+              <p>Preencha o campo abaixo para redefinir o <b>nome</b>:</p>
+              <form
+                action="{{ url_for('dashboard_actions', action = 'change_name', kid_id = kid.id) }}"
+                method="POST"
+              >
+                <div class="input-group mb-1">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Nome"
+                    aria-label="name"
+                    aria-describedby="basic-addon1"
+                    name="newName"
+                    value="{{kid.name}}"
+                    required
+                  />
+                  <button
+                    class="btn btn-lg btn-primary btn-block"
+                    type="submit"
+                  >
+                    Redefinir
+                  </button>
+                </div>
+              </form>
+            </div>
+            <div
+              class="tab-pane fade p-3"
+              id="nav-image"
+              role="tabpanel"
+              aria-labelledby="nav-image-tab"
+            >
+              <p class="mb-2">
+                Preencha os campos abaixo para mudar a
+                <b>imagem</b> de {{kid.name}}:
+              </p>
+              <form
+                action="{{ url_for('dashboard_actions', action = 'change_image', kid_id = kid.id) }}"
+                method="POST"
+                enctype="multipart/form-data"
+              >
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="form-control"
+                  id="imageInput"
+                  name="newImage"
+                  required
+                />
+                <button
+                  class="btn btn-lg btn-primary btn-block mt-3"
+                  type="submit"
+                >
+                  Redefinir
+                </button>
+              </form>
+            </div>
+            <div
+              class="tab-pane fade p-3"
+              id="nav-delete"
+              role="tabpanel"
+              aria-labelledby="nav-delete-tab"
+            >
+              <div class="alert alert-danger" role="alert">
+                Ao eliminar o painel de {{kid.name}}, tudo será excluído
+                permanentemente!
+              </div>
+              <form
+                action="{{ url_for('dashboard_actions', action = 'delete_kid', kid_id = kid.id) }}"
+                method="POST"
+              >
+                <div class="mb-3">
+                  <label for="passwordConfirmation" class="form-label"
+                    >Palavra-passe</label
+                  >
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="passwordConfirmation"
+                    aria-describedby="passwordConfirmation"
+                    name="passwordConfirmation"
+                  />
+                  <div id="passwordConfirmation" class="form-text">
+                    Insira a sua palavra-passe para confirmar a eliminação deste
+                    painel.
+                  </div>
+                </div>
+                <button class="btn btn-lg btn-danger btn-block" type="submit">
+                  Eliminar
+                </button>
+              </form>
+            </div>
+          </div>
+          <!-- Tabs Content End -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,374 @@
+{% extends "base.html" %} {% block content %}
+<h1>Painel de {{kid.name}}</h1>
+<!-- Actions Dropdown Button -->
+<div class="btn-group">
+  <button type="button" class="btn btn-primary">Acções</button>
+  <button
+    type="button"
+    class="btn btn-primary dropdown-toggle dropdown-toggle-split"
+    data-bs-toggle="dropdown"
+    aria-expanded="false"
+  ></button>
+  <ul class="dropdown-menu">
+    <li>
+      <a
+        class="dropdown-item"
+        href="#"
+        data-bs-toggle="modal"
+        data-bs-target="#kidDashboardModal"
+        ><i class="bi bi-plus-circle"></i> Adicionar novo barallho</a
+      >
+    </li>
+    <li>
+      <a class="dropdown-item" href="#"
+        ><i class="bi bi-aspect-ratio"></i> Mudar tamanho de cartas em
+        modo-criança</a
+      >
+    </li>
+    <li><hr class="dropdown-divider" /></li>
+    <li>
+      <a
+        class="dropdown-item"
+        href="{{url_for('kid_mode', username = user.username, kid_id = kid.id)}}"
+        target="_blank"
+        ><i class="bi bi-arrow-up-right"></i> Abrir modo-criança</a
+      >
+    </li>
+  </ul>
+</div>
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="kidDashboardModal"
+  tabindex="-1"
+  aria-labelledby="kidDashboardModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="kidDashboardModalLabel">
+          Painel de {{kid.name}}
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <!-- Tabs Navigation Start -->
+        <nav>
+          <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <button
+              class="nav-link active"
+              id="nav-deck-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#nav-deck"
+              type="button"
+              role="tab"
+              aria-controls="nav-deck"
+              aria-selected="true"
+            >
+              Baralho
+            </button>
+            <button
+              class="nav-link"
+              id="nav-cardSize-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#nav-cardSize"
+              type="button"
+              role="tab"
+              aria-controls="nav-cardSize"
+              aria-selected="true"
+            >
+              Tamanho de cartas
+            </button>
+          </div>
+        </nav>
+        <!-- Tabs Navigation End -->
+        <!-- Tabs Content Start -->
+        <div class="tab-content" id="nav-tabContent">
+          <div
+            class="tab-pane fade show active p-3"
+            id="nav-deck"
+            role="tabpanel"
+            aria-labelledby="nav-deck-tab"
+          >
+            <p>
+              Preencha os campos abaixo para adicionar um novo <b>baralho</b>:
+            </p>
+            <form
+              action="{{ url_for('kid_dashboard', action = 'add_deck', kid_id = kid.id, username = user.username) }}"
+              method="POST"
+              enctype="multipart/form-data"
+            >
+              <div class="mb-1">
+                <label for="deckName" class="form-label">Nome do baralho</label>
+                <input
+                  type="text"
+                  class="form-control mb-2"
+                  aria-label="name"
+                  aria-describedby="basic-addon1"
+                  id="deckName"
+                  name="deckName"
+                  required
+                />
+                <label for="imageInput" class="form-label"
+                  >Imagem do baralho</label
+                >
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="form-control mb-4"
+                  id="imageInput"
+                  name="deckImage"
+                  placeholder="Imagem"
+                  required
+                />
+                <button class="btn btn-primary btn-block" type="submit">
+                  Adicionar
+                </button>
+              </div>
+            </form>
+          </div>
+          <div
+            class="tab-pane fade p-3"
+            id="nav-cardSize"
+            role="tabpanel"
+            aria-labelledby="nav-cardSize-tab"
+          >
+            <p class="mb-2">
+              Preencha os campos abaixo para mudar o
+              <b>tamanho</b> cartas no <b>modo-criança</b>:
+            </p>
+            <form
+              action="{{ url_for('kid_dashboard', action = 'change_card_size', kid_id = kid.id, username = user.username) }}"
+              method="POST"
+              enctype="multipart/form-data"
+            >
+              <select class="form-select" name="cardSize">
+                <option selected value="6">Pequenas</option>
+                <option value="4">Médias</option>
+                <option value="3">Grandes</option>
+                <option value="2">Enormes</option>
+              </select>
+              <button class="btn btn-primary btn-block mt-3" type="submit">
+                Selecionar
+              </button>
+            </form>
+          </div>
+        </div>
+        <!-- Tabs Content End -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Decks -->
+<div class="row row-cols-4 mt-3">
+  {% for deck in kid.decks %}
+
+  <div class="card me-3">
+    <a
+      href="{{ url_for('deck_dashboard', action = 'view', kid_id = kid.id, username = user.username, deck_id = deck.id) }}"
+    >
+      <img
+        src="../../../{{deck.image_path}}"
+        class="card-img-top pt-2"
+        alt="Baralho sobre {{deck.name}}"
+        height="250"
+      />
+    </a>
+
+    <div class="card-body">
+      <div class="d-flex justify-content-between">
+        <h5 class="card-title align-self-center">{{deck.name}}</h5>
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#deckConfigurationsModal-{{deck.id}}"
+        >
+          <i class="bi bi-three-dots"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="deckConfigurationsModal-{{deck.id}}"
+    tabindex="-1"
+    aria-labelledby="deckConfigurationsModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deckConfigurationsModalLabel">
+            Configurações do baralho <i>{{deck.name}}</i>
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <!-- Tabs Navigation Start -->
+          <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+              <button
+                class="nav-link active"
+                id="nav-name-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-name"
+                type="button"
+                role="tab"
+                aria-controls="nav-name"
+                aria-selected="true"
+              >
+                Nome
+              </button>
+              <button
+                class="nav-link"
+                id="nav-image-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-image"
+                type="button"
+                role="tab"
+                aria-controls="nav-image"
+                aria-selected="true"
+              >
+                Imagem
+              </button>
+              <button
+                class="nav-link"
+                id="nav-delete-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-delete"
+                type="button"
+                role="tab"
+                aria-controls="nav-delete"
+                aria-selected="true"
+              >
+                Eliminar
+              </button>
+            </div>
+          </nav>
+          <!-- Tabs Navigation End -->
+          <!-- Tabs Content Start -->
+          <div class="tab-content" id="nav-tabContent">
+            <div
+              class="tab-pane fade show active p-3"
+              id="nav-name"
+              role="tabpanel"
+              aria-labelledby="nav-name-tab"
+            >
+              <p>Preencha o campo abaixo para redefinir o <b>nome</b>:</p>
+              <form
+                action="{{ url_for('kid_dashboard_actions', action = 'change_name', kid_id = kid.id, deck_id = deck.id) }}"
+                method="POST"
+              >
+                <div class="input-group mb-1">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Nome"
+                    aria-label="name"
+                    aria-describedby="basic-addon1"
+                    name="newName"
+                    value="{{deck.name}}"
+                    required
+                  />
+                  <button
+                    class="btn btn-lg btn-primary btn-block"
+                    type="submit"
+                  >
+                    Redefinir
+                  </button>
+                </div>
+              </form>
+            </div>
+            <div
+              class="tab-pane fade p-3"
+              id="nav-image"
+              role="tabpanel"
+              aria-labelledby="nav-image-tab"
+            >
+              <p class="mb-2">
+                Preencha o campo abaixo para mudar a
+                <b>imagem</b> do baralho {{deck.name}}:
+              </p>
+              <form
+                action="{{ url_for('kid_dashboard_actions', action = 'change_image', kid_id = kid.id, deck_id = deck.id) }}"
+                method="POST"
+                enctype="multipart/form-data"
+              >
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="form-control"
+                  id="imageInput"
+                  name="newImage"
+                  required
+                />
+                <button
+                  class="btn btn-lg btn-primary btn-block mt-3"
+                  type="submit"
+                >
+                  Redefinir
+                </button>
+              </form>
+            </div>
+            <div
+              class="tab-pane fade p-3"
+              id="nav-delete"
+              role="tabpanel"
+              aria-labelledby="nav-delete-tab"
+            >
+              <div class="alert alert-danger" role="alert">
+                Ao eliminar o baralho {{deck.name}}, tudo será excluído
+                permanentemente!
+              </div>
+              <form
+                action="{{ url_for('kid_dashboard_actions', action = 'delete_deck', kid_id = kid.id, deck_id = deck.id) }}"
+                method="POST"
+              >
+                <div class="mb-3">
+                  <label for="passwordConfirmation" class="form-label"
+                    >Palavra-passe</label
+                  >
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="passwordConfirmation"
+                    aria-describedby="passwordConfirmation"
+                    name="passwordConfirmation"
+                  />
+                  <div id="passwordConfirmation" class="form-text">
+                    Insira a sua palavra-passe para confirmar a eliminação deste
+                    painel.
+                  </div>
+                </div>
+                <button class="btn btn-lg btn-danger btn-block" type="submit">
+                  Eliminar
+                </button>
+              </form>
+            </div>
+          </div>
+          <!-- Tabs Content End -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% endfor %}
+</div>
+
+{% endblock %}

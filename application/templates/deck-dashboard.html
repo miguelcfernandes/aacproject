@@ -1,0 +1,324 @@
+{% extends "base.html" %} {% block content %}
+
+<h1>Painel do baralho {{deck.name}}</h1>
+
+<!-- Button trigger modal -->
+<button
+  type="button"
+  class="btn btn-primary"
+  data-bs-toggle="modal"
+  data-bs-target="#addCard"
+>
+  <i class="bi bi-plus-circle"></i> Adicionar carta
+</button>
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="addCard"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Adicionar carta</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form
+          method="POST"
+          enctype="multipart/form-data"
+          action="{{ url_for('deck_dashboard', action = 'add_card', username = user.username, kid_id = kid.id, deck_id = deck.id) }}"
+        >
+          <div class="mb-3">
+            <label for="nameInput" class="form-label">Nome</label>
+            <input
+              type="text"
+              class="form-control"
+              id="nameInput"
+              aria-describedby="emailHelp"
+              name="cardName"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="imageInput" class="form-label">Imagem</label>
+            <input
+              type="file"
+              class="form-control"
+              id="imageInput"
+              name="cardImage"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="imageInput" class="form-label"
+              >Audio (ficheiro <b>.mp3</b>)</label
+            >
+            <input
+              type="file"
+              accept="audio/*"
+              class="form-control"
+              id="audioInput"
+              name="cardAudio"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Adicionar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cards -->
+<div class="row row-cols-4 mt-3">
+  {% for card in deck.cards %}
+
+  <div class="card me-3">
+    <a onclick="playAudio('../../../../{{card.audio_path}}')">
+      <img
+        src="../../../../{{card.image_path}}"
+        class="card-img-top pt-2"
+        alt="Carta sobre {{card.name}}"
+        height="250"
+      />
+    </a>
+
+    <div class="card-body">
+      <div class="d-flex justify-content-between">
+        <h5 class="card-title align-self-center">{{card.name}}</h5>
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#cardConfigurationsModal-{{card.id}}"
+        >
+          <i class="bi bi-three-dots"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="cardConfigurationsModal-{{card.id}}"
+    tabindex="-1"
+    aria-labelledby="cardConfigurationsModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="cardConfigurationsModalLabel">
+            Configurações da carta <i>{{card.name}}</i>
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <!-- Tabs Navigation Start -->
+          <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+              <button
+                class="nav-link active"
+                id="nav-name-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-name"
+                type="button"
+                role="tab"
+                aria-controls="nav-name"
+                aria-selected="true"
+              >
+                Nome
+              </button>
+              <button
+                class="nav-link"
+                id="nav-image-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-image"
+                type="button"
+                role="tab"
+                aria-controls="nav-image"
+                aria-selected="true"
+              >
+                Imagem
+              </button>
+              <button
+                class="nav-link"
+                id="nav-audio-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-audio"
+                type="button"
+                role="tab"
+                aria-controls="nav-audio"
+                aria-selected="true"
+              >
+                Audio
+              </button>
+              <button
+                class="nav-link"
+                id="nav-delete-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#nav-delete"
+                type="button"
+                role="tab"
+                aria-controls="nav-delete"
+                aria-selected="true"
+              >
+                Eliminar
+              </button>
+            </div>
+          </nav>
+          <!-- Tabs Navigation End -->
+          <!-- Tabs Content Start -->
+          <div class="tab-content" id="nav-tabContent">
+            <div
+              class="tab-pane fade show active p-3"
+              id="nav-name"
+              role="tabpanel"
+              aria-labelledby="nav-name-tab"
+            >
+              <p>Preencha o campo abaixo para redefinir o <b>nome</b>:</p>
+              <form
+                action="{{ url_for('deck_dashboard_actions', action = 'change_name', kid_id = kid.id, deck_id = deck.id, card_id = card.id) }}"
+                method="POST"
+              >
+                <div class="input-group mb-1">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Nome"
+                    aria-label="name"
+                    aria-describedby="basic-addon1"
+                    name="newName"
+                    value="{{card.name}}"
+                    required
+                  />
+                  <button
+                    class="btn btn-lg btn-primary btn-block"
+                    type="submit"
+                  >
+                    Redefinir
+                  </button>
+                </div>
+              </form>
+            </div>
+            <div
+              class="tab-pane fade p-3"
+              id="nav-image"
+              role="tabpanel"
+              aria-labelledby="nav-image-tab"
+            >
+              <p class="mb-2">
+                Preencha o campo abaixo para mudar a
+                <b>imagem</b> da carta {{card.name}}:
+              </p>
+              <form
+                action="{{ url_for('deck_dashboard_actions', action = 'change_image', kid_id = kid.id, deck_id = deck.id, card_id = card.id) }}"
+                method="POST"
+                enctype="multipart/form-data"
+              >
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="form-control"
+                  id="imageInput"
+                  name="newImage"
+                  required
+                />
+                <button
+                  class="btn btn-lg btn-primary btn-block mt-3"
+                  type="submit"
+                >
+                  Redefinir
+                </button>
+              </form>
+            </div>
+            <div
+              class="tab-pane fade p-3"
+              id="nav-audio"
+              role="tabpanel"
+              aria-labelledby="nav-audio-tab"
+            >
+              <p class="mb-2">
+                Preencha o campo abaixo para mudar o
+                <b>audio</b> da carta {{card.name}}:
+              </p>
+              <form
+                action="{{ url_for('deck_dashboard_actions', action = 'change_audio', kid_id = kid.id, deck_id = deck.id, card_id = card.id) }}"
+                method="POST"
+                enctype="multipart/form-data"
+              >
+                <input
+                  type="file"
+                  accept="audio/*"
+                  class="form-control"
+                  id="audioInput"
+                  name="newAudio"
+                  required
+                />
+                <button
+                  class="btn btn-lg btn-primary btn-block mt-3"
+                  type="submit"
+                >
+                  Redefinir
+                </button>
+              </form>
+            </div>
+            <div
+              class="tab-pane fade p-3"
+              id="nav-delete"
+              role="tabpanel"
+              aria-labelledby="nav-delete-tab"
+            >
+              <div class="alert alert-danger" role="alert">
+                Ao eliminar a carta {{card.name}}, tudo será excluído
+                permanentemente!
+              </div>
+              <form
+                action="{{ url_for('deck_dashboard_actions', action = 'delete_card', kid_id = kid.id, deck_id = deck.id, card_id = card.id) }}"
+                method="POST"
+              >
+                <div class="mb-3">
+                  <label for="passwordConfirmation" class="form-label"
+                    >Palavra-passe</label
+                  >
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="passwordConfirmation"
+                    aria-describedby="passwordConfirmation"
+                    name="passwordConfirmation"
+                  />
+                  <div id="passwordConfirmation" class="form-text">
+                    Insira a sua palavra-passe para confirmar a eliminação deste
+                    painel.
+                  </div>
+                </div>
+                <button class="btn btn-lg btn-danger btn-block" type="submit">
+                  Eliminar
+                </button>
+              </form>
+            </div>
+          </div>
+          <!-- Tabs Content End -->
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
